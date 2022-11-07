@@ -1,0 +1,35 @@
+version: '3.8'
+services:
+  customer-mongo:
+    image: mongo
+    container_name: customer-mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb:/data/db
+    restart: unless-stopped
+    networks:
+      - customer_network
+  customer-backend:
+    container_name: customer-backend
+    build:
+      context: .
+    depends_on:
+      - customer-mongo
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/opt/app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - MONGO_URL=mongodb://customer-mongo:27017/customers
+    networks:
+      - customer_network
+    
+volumes:
+  mongodb:
+networks:
+  customer_network:
+    driver: bridge      
